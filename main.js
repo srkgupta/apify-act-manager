@@ -35,11 +35,11 @@ function waitForCrawlerFinish(crawlerId){
     });
 }
 
-async function postWebhook(url, execIds){
+async function postWebhook(url, body){
     const options = {
         method: 'POST',
         uri: url,
-        body: JSON.stringify(execIds),
+        body: body,
         json: true
     };
     await request(options);
