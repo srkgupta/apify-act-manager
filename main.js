@@ -39,7 +39,7 @@ async function postWebhook(url, body){
     const options = {
         method: 'POST',
         uri: url,
-        body: body,
+        body: JSON.stringify(body),
         json: true
     };
     await request(options);
