@@ -27,7 +27,7 @@ function waitForCrawlerFinish(crawlerId){
     return new Promise((resolve, reject) => {
         const interval = setInterval(async function(){
             const exec = await Apify.client.crawlers.getLastExecution({crawlerId: crawlerId});
-            if(exec.status != 'RUNNING'){
+            if(exec && exec.status != 'RUNNING'){
                 clearInterval(interval);
                 resolve(exec);
             }
