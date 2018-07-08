@@ -16,7 +16,7 @@ async function saveState(newState){
 
 async function isCrawlerRunning(crawlerId){
     const exec = await Apify.client.crawlers.getLastExecution({crawlerId: crawlerId});
-    if(!exec || exec.status === 'RUNNING'){
+    if(exec && exec.status === 'RUNNING'){
         return true;
     }else{
         return false;
