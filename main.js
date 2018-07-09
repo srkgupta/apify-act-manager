@@ -162,6 +162,19 @@ Apify.main(async () => {
 
     const results = await getAllExecutionResults(output.executionIds);
     await Apify.setValue('OUTPUT', results);
+    if(input.minLength){
+        if(results.length==0){
+            await sendMail(input.email,"No results from the Crawlers","<h1>No result found from all the Crawlers executed</h1>");
+        }else if(results.length<input.minLength){
+            msg = "<h1>The number of results found from all the Crawlers executed is less than mininum threshold. </h1>";
+            msg += `<p>Expected mininum: ${input.minLength}</p>`
+            msg += `<p>Actual results: ${results.length}</p>`
+            await sendMail(input.email,"Low results from the Crawlers",msg);
+        }
+    }
+    if(results.length<input.minLength){
+        await sendMail(input.email,"")
+    }
     if(input.finalWebhook){
         await postWebhook(input.finalWebhook, results);
     }
