@@ -150,15 +150,18 @@ async function getAllExecutionResults(execIds){
 }
 
 function checkResults(input,count){
-    if(input.minLength){
+    if(input.email){
         console.log("Checking minimum number of results from all crawlers");
         if(count==0){
             await sendMail(input.email,"No results from the Crawlers","<h1>No result found from all the Crawlers executed</h1>");
-        }else if(count<input.minLength){
+        }else if(input.minLength && count<input.minLength){
             msg = "<h1>The number of results found from all the Crawlers executed is less than the mininum threshold. </h1>";
             msg += `<h2>Expected mininum: ${input.minLength}</h2>`
             msg += `<h2>Actual results count: ${count}</h2>`
             await sendMail(input.email,"Low results from the Crawlers",msg);
+        }else{
+            msg = `<h2>APIfy Crawlers completed and crawled ${count} results`;
+            await sendMail(input.email,`APIfy crawled ${count} results`,msg);
         }
     }    
 }
