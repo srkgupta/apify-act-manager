@@ -23,13 +23,17 @@ async function isCrawlerRunning(crawlerId){
     }
 }
 
-function waitForCrawlerFinish(crawlerId){
+function waitForCrawlerFinish(crawlerId,input){
     return new Promise((resolve, reject) => {
         const interval = setInterval(async function(){
             const exec = await Apify.client.crawlers.getLastExecution({crawlerId: crawlerId});
             if(exec && exec.status != 'RUNNING'){
                 clearInterval(interval);
                 resolve(exec);
+                if(exec.status==='FAILED' || exec.status==='ABORTED'){
+                    errorMsg = `<h1>Status of the Crawler ${crawlerId} is ${exec.status}</h1>`;
+                    await sendMail(input.email,"Crawler Failed",errorMsg);
+                }
             }
         }, 1000);
     });
@@ -43,6 +47,15 @@ async function postWebhook(url, body){
         json: true
     };
     await request(options);
+}
+
+async function sendMail(email,subject,content){
+    // Send prices to your email.
+    await Apify.call('apify/send-mail', {
+        to: email,
+        subject: subject,
+        html: content
+    });    
 }
 
 function runActions(actions, parallels){
@@ -73,7 +86,8 @@ function runActions(actions, parallels){
     });
 }
 
-function createCrawlerActions(crawlers){
+function createCrawlerActions(input){
+    const crawlers = input.crawlers;
     const actions = [];
     _.each(crawlers, (crawler) => {
         actions.push(async () => {
@@ -85,7 +99,7 @@ function createCrawlerActions(crawlers){
                 });
             }
             else{console.log('waiting for crawler: ' + crawler.id);}
-            const run = await waitForCrawlerFinish(crawler.id);
+            const run = await waitForCrawlerFinish(crawler.id,input);
             output.executionIds.push(run._id);
             console.log('crawler finished: ' + crawler.id);
         });
@@ -143,7 +157,7 @@ Apify.main(async () => {
     if(!input.crawlers){return console.log('missing "crawlers" attribute in INPUT');}
     if(!input.parallel){input.parallel = 5;}
     
-    const actions = createCrawlerActions(input.crawlers);
+    const actions = createCrawlerActions(input);
     await runActions(actions, input.parallel);
 
     const results = await getAllExecutionResults(output.executionIds);
