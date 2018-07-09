@@ -149,7 +149,7 @@ async function getAllExecutionResults(execIds){
     return results;
 }
 
-function checkResults(input,count){
+async function checkResults(input,count){
     if(input.email){
         console.log("Checking minimum number of results from all crawlers");
         if(count==0){
@@ -178,7 +178,7 @@ Apify.main(async () => {
 
     const results = await getAllExecutionResults(output.executionIds);
     await Apify.setValue('OUTPUT', results);
-    checkResults(input,results.length);
+    await checkResults(input,results.length);
     if(input.finalWebhook){
         await postWebhook(input.finalWebhook, results);
     }
